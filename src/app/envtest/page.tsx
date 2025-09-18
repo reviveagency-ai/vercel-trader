@@ -1,8 +1,10 @@
+// src/app/envtest/page.tsx
 import { api } from '@/lib/api';
 
 export default async function EnvTestPage() {
-  const health = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/health`, { cache: 'no-store' }).then(r => r.json());
-  const trades = await api('/trades'); // protected route (uses x-api-key)
+  const health = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/health`, { cache: 'no-store' })
+    .then(r => r.json());
+  const trades = await api('/trades'); // protected (adds x-api-key)
 
   return (
     <div style={{ padding: 24, fontFamily: 'sans-serif' }}>
@@ -15,3 +17,4 @@ export default async function EnvTestPage() {
     </div>
   );
 }
+
