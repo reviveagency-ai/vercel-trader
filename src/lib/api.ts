@@ -3,7 +3,7 @@ type APIError = { ok: false; status: number; error: string };
 type APIData = unknown;
 
 export async function api(path: string, opts: RequestInit = {}): Promise<APIData | APIError> {
-  // Use the server proxy (/api/*), NOT the external backend directly
+  // Call our server proxy (/api/*) so no secrets are exposed client-side
   const res = await fetch(`/api${path}`, {
     ...opts,
     cache: 'no-store',
@@ -22,11 +22,11 @@ export async function api(path: string, opts: RequestInit = {}): Promise<APIData
   }
 
   if (!res.ok) {
-    const err =
+    const msg =
       typeof data === 'object' && data !== null && 'error' in (data as Record<string, unknown>)
         ? String((data as Record<string, unknown>).error)
         : txt;
-    return { ok: false, status: res.status, error: err };
+    return { ok: false, status: res.status, error: msg };
   }
   return data as APIData;
 }

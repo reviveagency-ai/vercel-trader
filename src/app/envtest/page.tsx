@@ -2,22 +2,20 @@
 export const dynamic = 'force-dynamic';
 
 type Health = { ok: boolean; [k: string]: unknown };
-type Trades = { ok: boolean; [k: string]: unknown };
+type Trades = { ok: boolean; [k: string]: unknown } | { raw: string } | { ok: false; error: string; status?: number };
 
 async function getJSON<T>(url: string): Promise<T | { ok: false; error: string; status?: number }> {
   const r = await fetch(url, { cache: 'no-store' });
   const txt = await r.text();
   try {
-    const data = JSON.parse(txt) as T;
-    // if server returned an error shape, just pass it through
-    return data;
+    return JSON.parse(txt) as T;
   } catch {
     return { ok: false, error: txt, status: r.status };
   }
 }
 
 export default async function EnvTestPage() {
-  // Use our server-side proxies so secrets never hit the browser
+  // Use our server proxies
   const health = (await getJSON<Health>('/api/health')) as Health;
   const trades = (await getJSON<Trades>('/api/trades')) as Trades;
 
@@ -32,7 +30,7 @@ export default async function EnvTestPage() {
       <pre>{JSON.stringify(trades, null, 2)}</pre>
 
       <p style={{ opacity: 0.7 }}>
-        If you see Unauthorized: bad x-api-key, make sure the server env <code>API_KEY</code> equals Vercel env{' '}
+        If you see Unauthorized: bad x-api-key, ensure server env <code>API_KEY</code> equals Vercel env{' '}
         <code>FRONTEND_API_KEY</code>.
       </p>
     </div>

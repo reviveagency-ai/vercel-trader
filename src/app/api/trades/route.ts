@@ -1,9 +1,9 @@
 // src/app/api/trades/route.ts
 export const dynamic = 'force-dynamic';
 
-type ErrorShape = { ok: false; error: string; status?: number };
+type ErrorShape = { ok: false; error: string; status?: number; [k: string]: unknown };
 type OkShape = { ok: true } & Record<string, unknown>;
-type TradesResponse = OkShape | ErrorShape;
+type TradesResponse = OkShape | ErrorShape | { raw: string };
 
 export async function GET(): Promise<Response> {
   const base = process.env.BACKEND_URL!;
@@ -15,7 +15,7 @@ export async function GET(): Promise<Response> {
     });
 
     const txt = await r.text();
-    let data: unknown;
+    let data: TradesResponse;
     try {
       data = JSON.parse(txt) as TradesResponse;
     } catch {
