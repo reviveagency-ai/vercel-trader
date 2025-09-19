@@ -6,9 +6,17 @@ export async function api(path: string, opts: RequestInit = {}) {
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': process.env.NEXT_PUBLIC_FRONTEND_API_KEY ?? '',
-      ...(opts.headers || {})
+      ...(opts.headers || {}),
     },
+    cache: 'no-store',
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+
+  const txt = await res.text();
+  let data: any;
+  try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+
+  if (!res.ok) {
+    return { ok: false, status: res.status, error: data?.error ?? txt };
+  }
+  return data;
 }
