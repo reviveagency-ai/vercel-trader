@@ -3,14 +3,10 @@ type APIError = { ok: false; status: number; error: string };
 type APIData = unknown;
 
 export async function api(path: string, opts: RequestInit = {}): Promise<APIData | APIError> {
-  // Call our server proxy (/api/*) so no secrets are exposed client-side
   const res = await fetch(`/api${path}`, {
     ...opts,
     cache: 'no-store',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(opts.headers || {}),
-    },
+    headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
   });
 
   const txt = await res.text();
