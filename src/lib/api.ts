@@ -1,22 +1,32 @@
 // src/lib/api.ts
-export async function api(path: string, opts: RequestInit = {}) {
-  const base = process.env.NEXT_PUBLIC_BACKEND_URL!;
-  const res = await fetch(`${base}${path}`, {
+type APIError = { ok: false; status: number; error: string };
+type APIData = unknown;
+
+export async function api(path: string, opts: RequestInit = {}): Promise<APIData | APIError> {
+  // Use the server proxy (/api/*), NOT the external backend directly
+  const res = await fetch(`/api${path}`, {
     ...opts,
+    cache: 'no-store',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.NEXT_PUBLIC_FRONTEND_API_KEY ?? '',
       ...(opts.headers || {}),
     },
-    cache: 'no-store',
   });
 
   const txt = await res.text();
-  let data: any;
-  try { data = JSON.parse(txt); } catch { data = { raw: txt }; }
+  let data: unknown;
+  try {
+    data = JSON.parse(txt);
+  } catch {
+    data = { raw: txt };
+  }
 
   if (!res.ok) {
-    return { ok: false, status: res.status, error: data?.error ?? txt };
+    const err =
+      typeof data === 'object' && data !== null && 'error' in (data as Record<string, unknown>)
+        ? String((data as Record<string, unknown>).error)
+        : txt;
+    return { ok: false, status: res.status, error: err };
   }
-  return data;
+  return data as APIData;
 }
