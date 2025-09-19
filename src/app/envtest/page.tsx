@@ -1,6 +1,4 @@
 // src/app/envtest/page.tsx
-import { headers } from 'next/headers';
-
 export const dynamic = 'force-dynamic';
 
 type Json = Record<string, unknown>;
@@ -12,8 +10,8 @@ async function j(url: string) {
 }
 
 export default async function EnvTestPage() {
-  const hdrs = headers();
-  const host = hdrs.get('host') ?? 'localhost:3000';
+  // Build absolute origin without headers()
+  const host = process.env.VERCEL_URL ?? 'localhost:3000';
   const proto = process.env.VERCEL ? 'https' : 'http';
   const origin = `${proto}://${host}`;
 
